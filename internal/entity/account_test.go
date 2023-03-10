@@ -9,7 +9,7 @@ import (
 func TestNewAccount_CreateSuccessfully(t *testing.T) {
 	expectedCustomer, _ := NewCustomer("alex", "alexandrebrunodias@gmail.com")
 	expectedBalance := decimal.Zero
-	account, err := newAccount(expectedCustomer)
+	account, err := NewAccount(expectedCustomer)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expectedCustomer.ID, account.Customer.ID)
@@ -18,7 +18,7 @@ func TestNewAccount_CreateSuccessfully(t *testing.T) {
 
 func TestNewAccount_FailDueToNullCustomer(t *testing.T) {
 	expectedErrorMessage := "'customer' should not be null"
-	account, err := newAccount(nil)
+	account, err := NewAccount(nil)
 
 	assert.NotNil(t, err)
 	assert.Nil(t, account)
@@ -28,7 +28,7 @@ func TestNewAccount_FailDueToNullCustomer(t *testing.T) {
 func TestCreditAccount_Successfully(t *testing.T) {
 	expectedCustomer, _ := NewCustomer("alex", "alexandrebrunodias@gmail.com")
 	expectedBalance, _ := decimal.NewFromString("1000.32")
-	account, _ := newAccount(expectedCustomer)
+	account, _ := NewAccount(expectedCustomer)
 
 	err := account.Credit(expectedBalance)
 
@@ -41,7 +41,7 @@ func TestCreditAccount_FailDueZeroAmount(t *testing.T) {
 	expectedCustomer, _ := NewCustomer("alex", "alexandrebrunodias@gmail.com")
 	expectedErrorMessage := "credit a negative or zero 'amount' is not allowed"
 	expectedBalance := decimal.Zero
-	account, _ := newAccount(expectedCustomer)
+	account, _ := NewAccount(expectedCustomer)
 
 	err := account.Credit(expectedBalance)
 
@@ -53,7 +53,7 @@ func TestCreditAccount_FailDueNegativeAmount(t *testing.T) {
 	expectedCustomer, _ := NewCustomer("alex", "alexandrebrunodias@gmail.com")
 	expectedErrorMessage := "credit a negative or zero 'amount' is not allowed"
 	expectedBalance, _ := decimal.NewFromString("-1000.32")
-	account, _ := newAccount(expectedCustomer)
+	account, _ := NewAccount(expectedCustomer)
 
 	err := account.Credit(expectedBalance)
 
@@ -64,7 +64,7 @@ func TestCreditAccount_FailDueNegativeAmount(t *testing.T) {
 func TestDebitAccount_Successfully(t *testing.T) {
 	expectedCustomer, _ := NewCustomer("alex", "alexandrebrunodias@gmail.com")
 	expectedBalance, _ := decimal.NewFromString("1000.32")
-	account, _ := newAccount(expectedCustomer)
+	account, _ := NewAccount(expectedCustomer)
 
 	err := account.Credit(expectedBalance)
 
@@ -75,7 +75,7 @@ func TestDebitAccount_Successfully(t *testing.T) {
 
 func TestDebitAccount_FailDueNegativeAmount(t *testing.T) {
 	expectedCustomer, _ := NewCustomer("alex", "alexandrebrunodias@gmail.com")
-	account, _ := newAccount(expectedCustomer)
+	account, _ := NewAccount(expectedCustomer)
 	expectedErrorMessage := "debit a negative or zero 'amount' is not allowed"
 
 	negativeAmount, _ := decimal.NewFromString("-1000.32")
@@ -87,7 +87,7 @@ func TestDebitAccount_FailDueNegativeAmount(t *testing.T) {
 
 func TestDebitAccount_FailDueToInsufficientFunds(t *testing.T) {
 	expectedCustomer, _ := NewCustomer("alex", "alexandrebrunodias@gmail.com")
-	account, _ := newAccount(expectedCustomer)
+	account, _ := NewAccount(expectedCustomer)
 
 	amount, _ := decimal.NewFromString("1000.32")
 	expectedErrorMessage := "insufficient funds | balance: 0 - debit amount: " + amount.String()

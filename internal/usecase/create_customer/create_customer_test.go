@@ -9,23 +9,9 @@ import (
 	"testing"
 )
 
-type CustomerGatewayMock struct {
-	mock.Mock
-}
-
-func (m *CustomerGatewayMock) Save(customer *entity.Customer) error {
-	args := m.Called(customer)
-	return args.Error(0)
-}
-
-func (m *CustomerGatewayMock) GetById(uuid uuid.UUID) (*entity.Customer, error) {
-	args := m.Called(uuid)
-	return args.Get(0).(*entity.Customer), args.Error(1)
-}
-
-func TestCreateCustomerUseCase_CreateSuccessfully(t *testing.T) {
-	gatewayMock := &CustomerGatewayMock{}
-	gatewayMock.On("Save", mock.Anything).Return(nil)
+func TestCreateCustomerUseCase_Execute_CreateSuccessfully(t *testing.T) {
+	customerGatewayMock := &CustomerGatewayMock{}
+	customerGatewayMock.On("Save", mock.Anything).Return(nil)
 
 	expectedName := "alex"
 	expectedEmail := "alexandrebrunodias@gmail.com"
@@ -35,7 +21,7 @@ func TestCreateCustomerUseCase_CreateSuccessfully(t *testing.T) {
 		Email: expectedEmail,
 	}
 
-	useCase := NewCreateCustomerUseCase(gatewayMock)
+	useCase := NewCreateCustomerUseCase(customerGatewayMock)
 	output, err := useCase.Execute(command)
 
 	assert.Nil(t, err)
@@ -46,11 +32,11 @@ func TestCreateCustomerUseCase_CreateSuccessfully(t *testing.T) {
 	assert.NotNil(t, output.CreatedAt)
 	assert.NotNil(t, output.UpdatedAt)
 
-	gatewayMock.AssertExpectations(t)
-	gatewayMock.AssertNumberOfCalls(t, "Save", 1)
+	customerGatewayMock.AssertExpectations(t)
+	customerGatewayMock.AssertNumberOfCalls(t, "Save", 1)
 }
 
-func TestCreateCustomerUseCase_FailDueToGatewayError(t *testing.T) {
+func TestCreateCustomerUseCase_Execute_FailDueToGatewayError(t *testing.T) {
 	expectedErrorMessage := "gateway error"
 
 	gatewayMock := &CustomerGatewayMock{}
@@ -73,4 +59,18 @@ func TestCreateCustomerUseCase_FailDueToGatewayError(t *testing.T) {
 
 	gatewayMock.AssertExpectations(t)
 	gatewayMock.AssertNumberOfCalls(t, "Save", 1)
+}
+
+type CustomerGatewayMock struct {
+	mock.Mock
+}
+
+func (m *CustomerGatewayMock) Save(customer *entity.Customer) error {
+	args := m.Called(customer)
+	return args.Error(0)
+}
+
+func (m *CustomerGatewayMock) GetByID(ID uuid.UUID) (*entity.Customer, error) {
+	args := m.Called(ID)
+	return args.Get(0).(*entity.Customer), args.Error(1)
 }

@@ -16,7 +16,7 @@ type Account struct {
 	UpdatedAt time.Time
 }
 
-func newAccount(customer *Customer) (*Account, error) {
+func NewAccount(customer *Customer) (*Account, error) {
 	if customer == nil {
 		return nil, errors.New("'customer' should not be null")
 	}

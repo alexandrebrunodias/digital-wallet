@@ -7,5 +7,5 @@ import (
 
 type CustomerGateway interface {
 	Save(customer *entity.Customer) error
-	GetById(uuid uuid.UUID) (*entity.Customer, error)
+	GetByID(ID uuid.UUID) (*entity.Customer, error)
 }

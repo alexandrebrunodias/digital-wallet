@@ -21,7 +21,7 @@ type Transaction struct {
 	Amount      decimal.Decimal
 }
 
-func newTransaction(fromAccount *Account, toAccount *Account, amount decimal.Decimal) (*Transaction, error) {
+func NewTransaction(fromAccount *Account, toAccount *Account, amount decimal.Decimal) (*Transaction, error) {
 	transaction := &Transaction{
 		ID:          uuid.New(),
 		fromAccount: fromAccount,

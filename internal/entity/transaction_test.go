@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"fmt"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -10,13 +11,18 @@ func TestNewTransaction_CreateSuccessfully(t *testing.T) {
 	customer1, _ := NewCustomer("alex", "alexandrebrunodias@gmail.com")
 	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
 
-	expectedFromAccount, _ := NewAccount(customer1)
-	expectedFromAccount.Credit(decimal.NewFromInt(200))
-
-	expectedToAccount, _ := NewAccount(customer2)
-
 	expectedStatus := COMPLETED
 	expectedAmount := decimal.NewFromInt(100)
+
+	expectedFromAccount, _ := NewAccount(customer1)
+	expectedFromAccountInitialBalance := decimal.NewFromInt(200)
+	expectedFromAccountFinalBalance := expectedFromAccountInitialBalance.Sub(expectedAmount)
+	expectedFromAccount.Credit(expectedFromAccountInitialBalance)
+
+	expectedToAccount, _ := NewAccount(customer2)
+	expectedToAccountInitialBalance := decimal.NewFromInt(200)
+	expectedToAccountFinalBalance := expectedToAccountInitialBalance.Add(expectedAmount)
+	expectedToAccount.Credit(expectedToAccountInitialBalance)
 
 	transaction, err := NewTransaction(expectedFromAccount, expectedToAccount, expectedAmount)
 
@@ -24,8 +30,8 @@ func TestNewTransaction_CreateSuccessfully(t *testing.T) {
 	assert.NotNil(t, transaction)
 	assert.Equal(t, expectedStatus, transaction.Status)
 	assert.Equal(t, expectedAmount, transaction.Amount)
-	assert.Equal(t, expectedFromAccount, transaction.fromAccount)
-	assert.Equal(t, expectedToAccount.Balance, expectedAmount)
+	assert.Equal(t, expectedFromAccountFinalBalance, transaction.fromAccount.Balance)
+	assert.Equal(t, expectedToAccountFinalBalance, transaction.toAccount.Balance)
 }
 
 func TestNewTransaction_FailDueToNilFromAccount(t *testing.T) {
@@ -119,7 +125,10 @@ func TestNewTransaction_FailDueToErrorDebitingAccount(t *testing.T) {
 	expectedToAccount, _ := NewAccount(customer2)
 
 	expectedAmount := decimal.NewFromInt(100)
-	expectedErrorMessage := "insufficient funds | balance: 0 - debit amount: " + expectedAmount.String()
+	expectedErrorMessage := fmt.Sprintf(
+		"customer %s has insufficient funds | balance: 0 - debit amount: %s",
+		customer1.ID, expectedAmount.String(),
+	)
 
 	transaction, err := NewTransaction(expectedFromAccount, expectedToAccount, expectedAmount)
 

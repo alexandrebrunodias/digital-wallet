@@ -45,8 +45,8 @@ func (a *Account) Debit(amount decimal.Decimal) error {
 
 	if a.Balance.LessThan(amount) {
 		return errors.New(
-			fmt.Sprintf("insufficient funds | balance: %s - debit amount: %s",
-				a.Balance.String(), amount.String()),
+			fmt.Sprintf("customer %s has insufficient funds | balance: %s - debit amount: %s",
+				a.Customer.ID, a.Balance.String(), amount.String()),
 		)
 	}
 

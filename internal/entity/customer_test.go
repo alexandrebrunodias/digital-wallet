@@ -8,7 +8,7 @@ import (
 func TestNewCustomer_CreateSuccessfully(t *testing.T) {
 	expectedName := "Alex"
 	expectedEmail := "alexandrebrunodias@gmail.com"
-	customer, err := newCustomer(expectedName, expectedEmail)
+	customer, err := NewCustomer(expectedName, expectedEmail)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expectedName, customer.Name)
@@ -18,7 +18,7 @@ func TestNewCustomer_CreateSuccessfully(t *testing.T) {
 func TestNewCustomer_ErrorDueToEmptyName(t *testing.T) {
 	expectedName := ""
 	expectedEmail := "alexandrebrunodias@gmail.com"
-	customer, err := newCustomer(expectedName, expectedEmail)
+	customer, err := NewCustomer(expectedName, expectedEmail)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, err.Error(), "'name' should not be blank")
@@ -28,7 +28,7 @@ func TestNewCustomer_ErrorDueToEmptyName(t *testing.T) {
 func TestNewCustomer_ErrorDueToEmptyEmail(t *testing.T) {
 	expectedName := "Alex"
 	expectedEmail := ""
-	customer, err := newCustomer(expectedName, expectedEmail)
+	customer, err := NewCustomer(expectedName, expectedEmail)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, err.Error(), "'email' is invalid")
@@ -38,7 +38,7 @@ func TestNewCustomer_ErrorDueToEmptyEmail(t *testing.T) {
 func TestNewCustomer_ErrorDueToInvalidEmail(t *testing.T) {
 	expectedName := "Alex"
 	expectedEmail := "invalid_email"
-	customer, err := newCustomer(expectedName, expectedEmail)
+	customer, err := NewCustomer(expectedName, expectedEmail)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, err.Error(), "'email' is invalid")
@@ -48,7 +48,7 @@ func TestNewCustomer_ErrorDueToInvalidEmail(t *testing.T) {
 func TestUpdateCustomer_UpdatedSuccessfully(t *testing.T) {
 	expectedName := "Xela"
 	expectedEmail := "erdnaxelaonurbsaid@giamg.moc"
-	customer, _ := newCustomer("Alex", "alexandrebrunodias@gmail.com")
+	customer, _ := NewCustomer("Alex", "alexandrebrunodias@gmail.com")
 
 	err := customer.Update(expectedName, expectedEmail)
 
@@ -60,7 +60,7 @@ func TestUpdateCustomer_UpdatedSuccessfully(t *testing.T) {
 func TestUpdateCustomer_ErrorDueToInvalidParam(t *testing.T) {
 	expectedName := ""
 	expectedEmail := "erdnaxelaonurbsaid@giamg.moc"
-	customer, _ := newCustomer("Alex", "alexandrebrunodias@gmail.com")
+	customer, _ := NewCustomer("Alex", "alexandrebrunodias@gmail.com")
 
 	err := customer.Update(expectedName, expectedEmail)
 

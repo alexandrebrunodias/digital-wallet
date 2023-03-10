@@ -16,7 +16,7 @@ type Customer struct {
 	UpdatedAt time.Time
 }
 
-func newCustomer(name string, email string) (*Customer, error) {
+func NewCustomer(name string, email string) (*Customer, error) {
 	now := time.Now()
 	customer := &Customer{
 		ID:        uuid.New(),

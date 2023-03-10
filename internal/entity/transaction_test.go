@@ -7,8 +7,8 @@ import (
 )
 
 func TestNewTransaction_CreateSuccessfully(t *testing.T) {
-	customer1, _ := newCustomer("alex", "alexandrebrunodias@gmail.com")
-	customer2, _ := newCustomer("alex2", "alexandrebrunodias@gmail.com")
+	customer1, _ := NewCustomer("alex", "alexandrebrunodias@gmail.com")
+	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
 
 	expectedFromAccount, _ := newAccount(customer1)
 	expectedFromAccount.Credit(decimal.NewFromInt(200))
@@ -29,7 +29,7 @@ func TestNewTransaction_CreateSuccessfully(t *testing.T) {
 }
 
 func TestNewTransaction_FailDueToNilFromAccount(t *testing.T) {
-	customer2, _ := newCustomer("alex2", "alexandrebrunodias@gmail.com")
+	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
 	expectedToAccount, _ := newAccount(customer2)
 
 	expectedErrorMessage := "neither 'fromAccount' nor 'toAccount' can be nil"
@@ -42,7 +42,7 @@ func TestNewTransaction_FailDueToNilFromAccount(t *testing.T) {
 }
 
 func TestNewTransaction_FailDueToNilToAccount(t *testing.T) {
-	customer, _ := newCustomer("alex2", "alexandrebrunodias@gmail.com")
+	customer, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
 	expectedFromAccount, _ := newAccount(customer)
 
 	expectedErrorMessage := "neither 'fromAccount' nor 'toAccount' can be nil"
@@ -55,10 +55,10 @@ func TestNewTransaction_FailDueToNilToAccount(t *testing.T) {
 }
 
 func TestNewTransaction_FailDueToNegativeAmount(t *testing.T) {
-	customer1, _ := newCustomer("alex1", "alexandrebrunodias@gmail.com")
+	customer1, _ := NewCustomer("alex1", "alexandrebrunodias@gmail.com")
 	expectedFromAccount, _ := newAccount(customer1)
 
-	customer2, _ := newCustomer("alex2", "alexandrebrunodias@gmail.com")
+	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
 	expectedToAccount, _ := newAccount(customer2)
 
 	expectedErrorMessage := "'amount' must be a non zero positive number"
@@ -71,10 +71,10 @@ func TestNewTransaction_FailDueToNegativeAmount(t *testing.T) {
 }
 
 func TestNewTransaction_FailDueToNegativeZero(t *testing.T) {
-	customer1, _ := newCustomer("alex1", "alexandrebrunodias@gmail.com")
+	customer1, _ := NewCustomer("alex1", "alexandrebrunodias@gmail.com")
 	expectedFromAccount, _ := newAccount(customer1)
 
-	customer2, _ := newCustomer("alex2", "alexandrebrunodias@gmail.com")
+	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
 	expectedToAccount, _ := newAccount(customer2)
 
 	expectedErrorMessage := "'amount' must be a non zero positive number"
@@ -87,11 +87,11 @@ func TestNewTransaction_FailDueToNegativeZero(t *testing.T) {
 }
 
 func TestNewTransaction_FailDueToAlreadyCompleted(t *testing.T) {
-	customer1, _ := newCustomer("alex1", "alexandrebrunodias@gmail.com")
+	customer1, _ := NewCustomer("alex1", "alexandrebrunodias@gmail.com")
 	expectedFromAccount, _ := newAccount(customer1)
 	expectedFromAccount.Credit(decimal.NewFromInt(200))
 
-	customer2, _ := newCustomer("alex2", "alexandrebrunodias@gmail.com")
+	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
 	expectedToAccount, _ := newAccount(customer2)
 
 	expectedStatus := COMPLETED
@@ -112,10 +112,10 @@ func TestNewTransaction_FailDueToAlreadyCompleted(t *testing.T) {
 }
 
 func TestNewTransaction_FailDueToErrorDebitingAccount(t *testing.T) {
-	customer1, _ := newCustomer("alex1", "alexandrebrunodias@gmail.com")
+	customer1, _ := NewCustomer("alex1", "alexandrebrunodias@gmail.com")
 	expectedFromAccount, _ := newAccount(customer1)
 
-	customer2, _ := newCustomer("alex2", "alexandrebrunodias@gmail.com")
+	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
 	expectedToAccount, _ := newAccount(customer2)
 
 	expectedAmount := decimal.NewFromInt(100)

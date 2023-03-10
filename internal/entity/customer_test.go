@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestCreateCustomer_CreateSuccessfully(t *testing.T) {
+func TestNewCustomer_CreateSuccessfully(t *testing.T) {
 	expectedName := "Alex"
 	expectedEmail := "alexandrebrunodias@gmail.com"
 	customer, err := newCustomer(expectedName, expectedEmail)
@@ -15,7 +15,7 @@ func TestCreateCustomer_CreateSuccessfully(t *testing.T) {
 	assert.Equal(t, expectedEmail, expectedEmail)
 }
 
-func TestCreateCustomer_ErrorDueToEmptyName(t *testing.T) {
+func TestNewCustomer_ErrorDueToEmptyName(t *testing.T) {
 	expectedName := ""
 	expectedEmail := "alexandrebrunodias@gmail.com"
 	customer, err := newCustomer(expectedName, expectedEmail)
@@ -25,7 +25,7 @@ func TestCreateCustomer_ErrorDueToEmptyName(t *testing.T) {
 	assert.Nil(t, customer)
 }
 
-func TestCreateCustomer_ErrorDueToEmptyEmail(t *testing.T) {
+func TestNewCustomer_ErrorDueToEmptyEmail(t *testing.T) {
 	expectedName := "Alex"
 	expectedEmail := ""
 	customer, err := newCustomer(expectedName, expectedEmail)
@@ -35,7 +35,7 @@ func TestCreateCustomer_ErrorDueToEmptyEmail(t *testing.T) {
 	assert.Nil(t, customer)
 }
 
-func TestCreateCustomer_ErrorDueToInvalidEmail(t *testing.T) {
+func TestNewCustomer_ErrorDueToInvalidEmail(t *testing.T) {
 	expectedName := "Alex"
 	expectedEmail := "invalid_email"
 	customer, err := newCustomer(expectedName, expectedEmail)

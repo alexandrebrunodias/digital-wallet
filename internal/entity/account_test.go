@@ -16,7 +16,7 @@ func TestNewAccount_CreateSuccessfully(t *testing.T) {
 	assert.Equal(t, expectedBalance, account.Balance)
 }
 
-func TestNewAccount_ErrorDueToNullCustomer(t *testing.T) {
+func TestNewAccount_FailDueToNullCustomer(t *testing.T) {
 	expectedErrorMessage := "'customer' should not be null"
 	account, err := newAccount(nil)
 
@@ -37,7 +37,7 @@ func TestCreditAccount_Successfully(t *testing.T) {
 	assert.Equal(t, expectedBalance.String(), account.Balance.String())
 }
 
-func TestCreditAccount_ErrorDueZeroAmount(t *testing.T) {
+func TestCreditAccount_FailDueZeroAmount(t *testing.T) {
 	expectedCustomer, _ := newCustomer("alex", "alexandrebrunodias@gmail.com")
 	expectedErrorMessage := "credit a negative or zero 'amount' is not allowed"
 	expectedBalance := decimal.Zero
@@ -49,7 +49,7 @@ func TestCreditAccount_ErrorDueZeroAmount(t *testing.T) {
 	assert.Equal(t, expectedErrorMessage, err.Error())
 }
 
-func TestCreditAccount_ErrorDueNegativeAmount(t *testing.T) {
+func TestCreditAccount_FailDueNegativeAmount(t *testing.T) {
 	expectedCustomer, _ := newCustomer("alex", "alexandrebrunodias@gmail.com")
 	expectedErrorMessage := "credit a negative or zero 'amount' is not allowed"
 	expectedBalance, _ := decimal.NewFromString("-1000.32")
@@ -73,7 +73,7 @@ func TestDebitAccount_Successfully(t *testing.T) {
 	assert.Equal(t, expectedBalance.String(), account.Balance.String())
 }
 
-func TestDebitAccount_ErrorDueNegativeAmount(t *testing.T) {
+func TestDebitAccount_FailDueNegativeAmount(t *testing.T) {
 	expectedCustomer, _ := newCustomer("alex", "alexandrebrunodias@gmail.com")
 	account, _ := newAccount(expectedCustomer)
 	expectedErrorMessage := "debit a negative or zero 'amount' is not allowed"
@@ -85,12 +85,12 @@ func TestDebitAccount_ErrorDueNegativeAmount(t *testing.T) {
 	assert.Equal(t, expectedErrorMessage, err.Error())
 }
 
-func TestDebitAccount_ErrorInsufficientFunds(t *testing.T) {
+func TestDebitAccount_FailDueToInsufficientFunds(t *testing.T) {
 	expectedCustomer, _ := newCustomer("alex", "alexandrebrunodias@gmail.com")
 	account, _ := newAccount(expectedCustomer)
 
 	amount, _ := decimal.NewFromString("1000.32")
-	expectedErrorMessage := "insuficient funds - balance 0 | debit amount " + amount.String()
+	expectedErrorMessage := "insufficient funds | balance: 0 - debit amount: " + amount.String()
 
 	err := account.Debit(amount)
 

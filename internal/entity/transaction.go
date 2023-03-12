@@ -48,13 +48,11 @@ func (t *Transaction) Commit() error {
 		return errors.New("transaction is already COMPLETED")
 	}
 
-	err := t.fromAccount.Debit(t.Amount)
-	if err != nil {
+	if err := t.fromAccount.Debit(t.Amount); err != nil {
 		return err
 	}
 
-	err = t.toAccount.Credit(t.Amount)
-	if err != nil {
+	if err := t.toAccount.Credit(t.Amount); err != nil {
 		return err
 	}
 

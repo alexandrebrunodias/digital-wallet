@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"fmt"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -90,7 +91,11 @@ func TestDebitAccount_FailDueToInsufficientFunds(t *testing.T) {
 	account, _ := NewAccount(expectedCustomer)
 
 	amount, _ := decimal.NewFromString("1000.32")
-	expectedErrorMessage := "insufficient funds | balance: 0 - debit amount: " + amount.String()
+	expectedErrorMessage :=
+		fmt.Sprintf(
+			"customer %s has insufficient funds | balance: 0 - debit amount: %s",
+			expectedCustomer.ID, amount.String(),
+		)
 
 	err := account.Debit(amount)
 

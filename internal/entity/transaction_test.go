@@ -4,135 +4,127 @@ import (
 	"fmt"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"testing"
 )
 
-func TestNewTransaction_CreateSuccessfully(t *testing.T) {
-	customer1, _ := NewCustomer("alex", "alexandrebrunodias@gmail.com")
-	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
+func TestNewTransactionTestSuite(t *testing.T) {
+	suite.Run(t, new(TransactionTestSuite))
+}
 
+func (s *TransactionTestSuite) TestNewTransaction_CreateSuccessfully() {
 	expectedStatus := COMPLETED
 	expectedAmount := decimal.NewFromInt(100)
 
-	expectedFromAccount, _ := NewAccount(customer1)
 	expectedFromAccountInitialBalance := decimal.NewFromInt(200)
 	expectedFromAccountFinalBalance := expectedFromAccountInitialBalance.Sub(expectedAmount)
-	expectedFromAccount.Credit(expectedFromAccountInitialBalance)
+	s.AccountFrom.Credit(expectedFromAccountInitialBalance)
 
-	expectedToAccount, _ := NewAccount(customer2)
 	expectedToAccountInitialBalance := decimal.NewFromInt(200)
 	expectedToAccountFinalBalance := expectedToAccountInitialBalance.Add(expectedAmount)
-	expectedToAccount.Credit(expectedToAccountInitialBalance)
+	s.AccountTo.Credit(expectedToAccountInitialBalance)
 
-	transaction, err := NewTransaction(expectedFromAccount, expectedToAccount, expectedAmount)
+	transaction, err := NewTransaction(s.AccountFrom, s.AccountTo, expectedAmount)
 
-	assert.Nil(t, err)
-	assert.NotNil(t, transaction)
-	assert.Equal(t, expectedStatus, transaction.Status)
-	assert.Equal(t, expectedAmount, transaction.Amount)
-	assert.Equal(t, expectedFromAccountFinalBalance, transaction.fromAccount.Balance)
-	assert.Equal(t, expectedToAccountFinalBalance, transaction.toAccount.Balance)
+	assert.Nil(s.T(), err)
+	assert.NotNil(s.T(), transaction)
+	assert.Equal(s.T(), expectedStatus, transaction.Status)
+	assert.Equal(s.T(), expectedAmount, transaction.Amount)
+	assert.Equal(s.T(), expectedFromAccountFinalBalance, transaction.fromAccount.Balance)
+	assert.Equal(s.T(), expectedToAccountFinalBalance, transaction.toAccount.Balance)
 }
 
-func TestNewTransaction_FailDueToNilFromAccount(t *testing.T) {
-	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
-	expectedToAccount, _ := NewAccount(customer2)
-
+func (s *TransactionTestSuite) TestNewTransaction_FailDueToNilFromAccount() {
 	expectedErrorMessage := "neither 'fromAccount' nor 'toAccount' can be nil"
 
-	transaction, err := NewTransaction(nil, expectedToAccount, decimal.NewFromInt(100))
+	transaction, err := NewTransaction(nil, s.AccountTo, decimal.NewFromInt(100))
 
-	assert.NotNil(t, err)
-	assert.Equal(t, expectedErrorMessage, err.Error())
-	assert.Nil(t, transaction)
+	assert.NotNil(s.T(), err)
+	assert.Equal(s.T(), expectedErrorMessage, err.Error())
+	assert.Nil(s.T(), transaction)
 }
 
-func TestNewTransaction_FailDueToNilToAccount(t *testing.T) {
-	customer, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
-	expectedFromAccount, _ := NewAccount(customer)
-
+func (s *TransactionTestSuite) TestNewTransaction_FailDueToNilToAccount() {
 	expectedErrorMessage := "neither 'fromAccount' nor 'toAccount' can be nil"
 
-	transaction, err := NewTransaction(nil, expectedFromAccount, decimal.NewFromInt(100))
+	transaction, err := NewTransaction(nil, s.AccountFrom, decimal.NewFromInt(100))
 
-	assert.NotNil(t, err)
-	assert.Equal(t, expectedErrorMessage, err.Error())
-	assert.Nil(t, transaction)
+	assert.NotNil(s.T(), err)
+	assert.Equal(s.T(), expectedErrorMessage, err.Error())
+	assert.Nil(s.T(), transaction)
 }
 
-func TestNewTransaction_FailDueToNegativeAmount(t *testing.T) {
-	customer1, _ := NewCustomer("alex1", "alexandrebrunodias@gmail.com")
-	expectedFromAccount, _ := NewAccount(customer1)
-
-	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
-	expectedToAccount, _ := NewAccount(customer2)
-
+func (s *TransactionTestSuite) TestNewTransaction_FailDueToNegativeAmount() {
 	expectedErrorMessage := "'amount' must be a non zero positive number"
 
-	transaction, err := NewTransaction(expectedFromAccount, expectedToAccount, decimal.NewFromInt(-100))
+	transaction, err := NewTransaction(s.AccountFrom, s.AccountTo, decimal.NewFromInt(-100))
 
-	assert.NotNil(t, err)
-	assert.Equal(t, expectedErrorMessage, err.Error())
-	assert.Nil(t, transaction)
+	assert.NotNil(s.T(), err)
+	assert.Equal(s.T(), expectedErrorMessage, err.Error())
+	assert.Nil(s.T(), transaction)
 }
 
-func TestNewTransaction_FailDueToNegativeZero(t *testing.T) {
-	customer1, _ := NewCustomer("alex1", "alexandrebrunodias@gmail.com")
-	expectedFromAccount, _ := NewAccount(customer1)
-
-	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
-	expectedToAccount, _ := NewAccount(customer2)
-
+func (s *TransactionTestSuite) TestNewTransaction_FailDueToNegativeZero() {
 	expectedErrorMessage := "'amount' must be a non zero positive number"
 
-	transaction, err := NewTransaction(expectedFromAccount, expectedToAccount, decimal.Zero)
+	transaction, err := NewTransaction(s.AccountFrom, s.AccountTo, decimal.Zero)
 
-	assert.NotNil(t, err)
-	assert.Equal(t, expectedErrorMessage, err.Error())
-	assert.Nil(t, transaction)
+	assert.NotNil(s.T(), err)
+	assert.Equal(s.T(), expectedErrorMessage, err.Error())
+	assert.Nil(s.T(), transaction)
 }
 
-func TestNewTransaction_FailDueToAlreadyCompleted(t *testing.T) {
-	customer1, _ := NewCustomer("alex1", "alexandrebrunodias@gmail.com")
-	expectedFromAccount, _ := NewAccount(customer1)
-	expectedFromAccount.Credit(decimal.NewFromInt(200))
-
-	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
-	expectedToAccount, _ := NewAccount(customer2)
+func (s *TransactionTestSuite) TestNewTransaction_FailDueToAlreadyCompleted() {
+	s.AccountFrom.Credit(decimal.NewFromInt(200))
 
 	expectedStatus := COMPLETED
 	expectedAmount := decimal.NewFromInt(100)
 	expectedErrorMessage := "transaction is already COMPLETED"
 
-	transaction, _ := NewTransaction(expectedFromAccount, expectedToAccount, expectedAmount)
+	transaction, _ := NewTransaction(s.AccountFrom, s.AccountTo, expectedAmount)
 
 	err := transaction.Commit()
 
-	assert.NotNil(t, err)
-	assert.Equal(t, expectedErrorMessage, err.Error())
-	assert.NotNil(t, transaction)
-	assert.Equal(t, expectedStatus, transaction.Status)
-	assert.Equal(t, expectedAmount, transaction.Amount)
-	assert.Equal(t, expectedFromAccount, transaction.fromAccount)
-	assert.Equal(t, expectedToAccount.Balance, expectedAmount)
+	assert.NotNil(s.T(), err)
+	assert.Equal(s.T(), expectedErrorMessage, err.Error())
+	assert.NotNil(s.T(), transaction)
+	assert.Equal(s.T(), expectedStatus, transaction.Status)
+	assert.Equal(s.T(), expectedAmount, transaction.Amount)
+	assert.Equal(s.T(), s.AccountFrom, transaction.fromAccount)
+	assert.Equal(s.T(), s.AccountTo.Balance.String(), expectedAmount.String())
 }
 
-func TestNewTransaction_FailDueToErrorDebitingAccount(t *testing.T) {
-	customer1, _ := NewCustomer("alex1", "alexandrebrunodias@gmail.com")
-	expectedFromAccount, _ := NewAccount(customer1)
-
-	customer2, _ := NewCustomer("alex2", "alexandrebrunodias@gmail.com")
-	expectedToAccount, _ := NewAccount(customer2)
-
+func (s *TransactionTestSuite) TestNewTransaction_FailDueToErrorDebitingAccount() {
 	expectedAmount := decimal.NewFromInt(100)
 	expectedErrorMessage := fmt.Sprintf(
 		"customer %s has insufficient funds | balance: 0 - debit amount: %s",
-		customer1.ID, expectedAmount.String(),
+		s.CustomerFrom.ID, expectedAmount.String(),
 	)
 
-	transaction, err := NewTransaction(expectedFromAccount, expectedToAccount, expectedAmount)
+	transaction, err := NewTransaction(s.AccountFrom, s.AccountTo, expectedAmount)
 
-	assert.NotNil(t, err)
-	assert.Equal(t, expectedErrorMessage, err.Error())
-	assert.Nil(t, transaction)
+	assert.NotNil(s.T(), err)
+	assert.Equal(s.T(), expectedErrorMessage, err.Error())
+	assert.Nil(s.T(), transaction)
+}
+
+type TransactionTestSuite struct {
+	suite.Suite
+	CustomerFrom *Customer
+	CustomerTo   *Customer
+	AccountFrom  *Account
+	AccountTo    *Account
+}
+
+func (s *TransactionTestSuite) SetupTest() {
+	var err error
+	s.CustomerFrom, err = NewCustomer("alex", "alexandrebrunodias@gmail.com")
+	s.Require().Nil(err)
+	s.AccountFrom, err = NewAccount(s.CustomerFrom)
+	s.Require().Nil(err)
+
+	s.CustomerTo, err = NewCustomer("alex", "alexandrebrunodias@gmail.com")
+	s.Require().Nil(err)
+	s.AccountTo, err = NewAccount(s.CustomerTo)
+	s.Require().Nil(err)
 }

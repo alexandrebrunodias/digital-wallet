@@ -17,7 +17,7 @@ type Customer struct {
 }
 
 func NewCustomer(name string, email string) (*Customer, error) {
-	now := time.Now()
+	now := time.Now().UTC()
 	customer := &Customer{
 		ID:        uuid.New(),
 		Name:      name,
@@ -25,9 +25,8 @@ func NewCustomer(name string, email string) (*Customer, error) {
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
-	err := customer.Validate()
 
-	if err != nil {
+	if err := customer.Validate(); err != nil {
 		return nil, err
 	}
 

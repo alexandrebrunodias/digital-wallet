@@ -18,11 +18,11 @@ func (s *TransactionTestSuite) TestNewTransaction_CreateSuccessfully() {
 
 	expectedFromAccountInitialBalance := decimal.NewFromInt(200)
 	expectedFromAccountFinalBalance := expectedFromAccountInitialBalance.Sub(expectedAmount)
-	s.AccountFrom.Credit(expectedFromAccountInitialBalance)
+	_ = s.AccountFrom.Credit(expectedFromAccountInitialBalance)
 
 	expectedToAccountInitialBalance := decimal.NewFromInt(200)
 	expectedToAccountFinalBalance := expectedToAccountInitialBalance.Add(expectedAmount)
-	s.AccountTo.Credit(expectedToAccountInitialBalance)
+	_ = s.AccountTo.Credit(expectedToAccountInitialBalance)
 
 	transaction, err := NewTransaction(s.AccountFrom, s.AccountTo, expectedAmount)
 
@@ -32,6 +32,7 @@ func (s *TransactionTestSuite) TestNewTransaction_CreateSuccessfully() {
 	assert.Equal(s.T(), expectedAmount, transaction.Amount)
 	assert.Equal(s.T(), expectedFromAccountFinalBalance, transaction.fromAccount.Balance)
 	assert.Equal(s.T(), expectedToAccountFinalBalance, transaction.toAccount.Balance)
+	assert.NotNil(s.T(), transaction.CreatedAt)
 }
 
 func (s *TransactionTestSuite) TestNewTransaction_FailDueToNilFromAccount() {
@@ -75,7 +76,7 @@ func (s *TransactionTestSuite) TestNewTransaction_FailDueToNegativeZero() {
 }
 
 func (s *TransactionTestSuite) TestNewTransaction_FailDueToAlreadyCompleted() {
-	s.AccountFrom.Credit(decimal.NewFromInt(200))
+	_ = s.AccountFrom.Credit(decimal.NewFromInt(200))
 
 	expectedStatus := COMPLETED
 	expectedAmount := decimal.NewFromInt(100)
@@ -92,6 +93,7 @@ func (s *TransactionTestSuite) TestNewTransaction_FailDueToAlreadyCompleted() {
 	assert.Equal(s.T(), expectedAmount, transaction.Amount)
 	assert.Equal(s.T(), s.AccountFrom, transaction.fromAccount)
 	assert.Equal(s.T(), s.AccountTo.Balance.String(), expectedAmount.String())
+	assert.NotNil(s.T(), transaction.CreatedAt)
 }
 
 func (s *TransactionTestSuite) TestNewTransaction_FailDueToErrorDebitingAccount() {

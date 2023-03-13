@@ -10,20 +10,20 @@ import (
 	"testing"
 )
 
-func TestNewCustomerPGDBTestSuite(t *testing.T) {
-	suite.Run(t, new(CustomerPgDBSuite))
+func TestNewCustomerPgDBTestSuite(t *testing.T) {
+	suite.Run(t, new(CustomerPgGatewaySuite))
 }
 
-func (s *CustomerPgDBSuite) TestSaveAndGetByID_SaveAndGetByIDSuccessfully() {
+func (s *CustomerPgGatewaySuite) TestSaveAndGetByID_SaveAndGetByIDSuccessfully() {
 	expectedName := "alex"
 	expectedEmail := "alexandrebrunodias@gmail.com"
 
 	expectedCustomer, _ := entity.NewCustomer(expectedName, expectedEmail)
 
-	err := s.CustomerPgDB.Save(expectedCustomer)
+	err := s.CustomerPgGateway.Save(expectedCustomer)
 	assert.Nil(s.T(), err)
 
-	actualCustomer, err := s.CustomerPgDB.GetByID(expectedCustomer.ID)
+	actualCustomer, err := s.CustomerPgGateway.GetByID(expectedCustomer.ID)
 
 	assert.Nil(s.T(), err)
 	assert.NotNil(s.T(), actualCustomer)
@@ -34,8 +34,8 @@ func (s *CustomerPgDBSuite) TestSaveAndGetByID_SaveAndGetByIDSuccessfully() {
 	assert.Equal(s.T(), expectedCustomer.UpdatedAt, actualCustomer.UpdatedAt)
 }
 
-func (s *CustomerPgDBSuite) TestGetByID_FetchEmpty() {
-	actualCustomer, err := s.CustomerPgDB.GetByID(uuid.New())
+func (s *CustomerPgGatewaySuite) TestGetByID_FetchEmpty() {
+	actualCustomer, err := s.CustomerPgGateway.GetByID(uuid.New())
 	expectedError := "sql: no rows in result set"
 
 	assert.NotNil(s.T(), err)
@@ -43,32 +43,30 @@ func (s *CustomerPgDBSuite) TestGetByID_FetchEmpty() {
 	assert.Nil(s.T(), actualCustomer)
 }
 
-type CustomerPgDBSuite struct {
+type CustomerPgGatewaySuite struct {
 	suite.Suite
-	CustomerPgDB *CustomerPgDB
+	CustomerPgGateway *CustomerPgGatewayDB
 }
 
-func (s *CustomerPgDBSuite) SetupSuite() {
+func (s *CustomerPgGatewaySuite) SetupSuite() {
 	db, err := sql.Open("sqlite3", ":memory:")
 	s.Require().Nil(err)
 
-	s.CustomerPgDB = NewCustomerPgDB(db)
+	s.CustomerPgGateway = NewCustomerPgGateway(db)
 
-	statement := `
-					CREATE TABLE customers (
-					    id binary(16) PRIMARY KEY,
-					    name VARCHAR(255) NOT NULL,
-					    email VARCHAR(255) NOT NULL,
-					    created_at DATETIME,
-					    updated_at DATETIME
-					)
-				 `
-	_, err = s.CustomerPgDB.DB.Exec(statement)
+	stmt := `CREATE TABLE customers (
+						id binary(16) PRIMARY KEY,
+						name VARCHAR(255) NOT NULL,
+						email VARCHAR(255) NOT NULL,
+						created_at DATETIME,
+						updated_at DATETIME
+				   )`
+
+	_, err = s.CustomerPgGateway.DB.Exec(stmt)
 	s.Require().Nil(err)
-
 }
 
-func (s *CustomerPgDBSuite) TearDownSuite() {
-	defer s.CustomerPgDB.DB.Close()
-	s.CustomerPgDB.DB.Exec("DROP TABLE customers")
+func (s *CustomerPgGatewaySuite) TearDownSuite() {
+	defer s.CustomerPgGateway.DB.Close()
+	_, _ = s.CustomerPgGateway.DB.Exec("DROP TABLE customers")
 }

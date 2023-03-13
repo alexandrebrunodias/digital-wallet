@@ -20,7 +20,8 @@ func NewAccount(customer *Customer) (*Account, error) {
 	if customer == nil {
 		return nil, errors.New("'customer' should not be null")
 	}
-	now := time.Now()
+
+	now := time.Now().UTC()
 	return &Account{
 		ID:        uuid.New(),
 		Customer:  customer,

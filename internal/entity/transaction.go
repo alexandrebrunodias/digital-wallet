@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	"time"
 )
 
 type Status string
@@ -19,6 +20,7 @@ type Transaction struct {
 	toAccount   *Account
 	Status      Status
 	Amount      decimal.Decimal
+	CreatedAt   time.Time
 }
 
 func NewTransaction(fromAccount *Account, toAccount *Account, amount decimal.Decimal) (*Transaction, error) {
@@ -28,13 +30,12 @@ func NewTransaction(fromAccount *Account, toAccount *Account, amount decimal.Dec
 		toAccount:   toAccount,
 		Status:      FAILED,
 		Amount:      amount,
+		CreatedAt:   time.Now().UTC(),
 	}
-
 	err := transaction.Validate()
 	if err != nil {
 		return nil, err
 	}
-
 	err = transaction.Commit()
 	if err != nil {
 		return nil, err
@@ -51,7 +52,6 @@ func (t *Transaction) Commit() error {
 	if err := t.fromAccount.Debit(t.Amount); err != nil {
 		return err
 	}
-
 	if err := t.toAccount.Credit(t.Amount); err != nil {
 		return err
 	}

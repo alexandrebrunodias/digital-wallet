@@ -17,7 +17,7 @@ func TestNewAccount_CreateSuccessfully(t *testing.T) {
 	assert.Equal(t, expectedBalance, account.Balance)
 }
 
-func TestNewAccount_FailDueToNullCustomer(t *testing.T) {
+func TestNewAccount_FailDueToNilCustomer(t *testing.T) {
 	expectedErrorMessage := "'customer' should not be null"
 	account, err := NewAccount(nil)
 

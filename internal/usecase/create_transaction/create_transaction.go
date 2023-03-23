@@ -51,5 +51,8 @@ func (uc *CreateTransactionUseCase) Execute(command CreateTransactionCommand) (*
 		return nil, err
 	}
 
+	_ = uc.AccountGateway.Save(fromAccount)
+	_ = uc.AccountGateway.Save(toAccount)
+
 	return &CreateTransactionOutput{ID: transaction.ID}, nil
 }

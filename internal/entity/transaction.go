@@ -16,8 +16,8 @@ const (
 
 type Transaction struct {
 	ID          uuid.UUID
-	fromAccount *Account
-	toAccount   *Account
+	FromAccount *Account
+	ToAccount   *Account
 	Status      Status
 	Amount      decimal.Decimal
 	CreatedAt   time.Time
@@ -26,8 +26,8 @@ type Transaction struct {
 func NewTransaction(fromAccount *Account, toAccount *Account, amount decimal.Decimal) (*Transaction, error) {
 	transaction := &Transaction{
 		ID:          uuid.New(),
-		fromAccount: fromAccount,
-		toAccount:   toAccount,
+		FromAccount: fromAccount,
+		ToAccount:   toAccount,
 		Status:      FAILED,
 		Amount:      amount,
 		CreatedAt:   time.Now().UTC(),
@@ -49,10 +49,10 @@ func (t *Transaction) Commit() error {
 		return errors.New("transaction is already COMPLETED")
 	}
 
-	if err := t.fromAccount.Debit(t.Amount); err != nil {
+	if err := t.FromAccount.Debit(t.Amount); err != nil {
 		return err
 	}
-	if err := t.toAccount.Credit(t.Amount); err != nil {
+	if err := t.ToAccount.Credit(t.Amount); err != nil {
 		return err
 	}
 
@@ -61,8 +61,8 @@ func (t *Transaction) Commit() error {
 }
 
 func (t *Transaction) Validate() error {
-	if t.fromAccount == nil || t.toAccount == nil {
-		return errors.New("neither 'fromAccount' nor 'toAccount' can be nil")
+	if t.FromAccount == nil || t.ToAccount == nil {
+		return errors.New("neither 'FromAccount' nor 'ToAccount' can be nil")
 	}
 	if t.Amount.IsNegative() || t.Amount.IsZero() {
 		return errors.New("'amount' must be a non zero positive number")

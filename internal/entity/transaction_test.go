@@ -30,13 +30,13 @@ func (s *TransactionTestSuite) TestNewTransaction_CreateSuccessfully() {
 	assert.NotNil(s.T(), transaction)
 	assert.Equal(s.T(), expectedStatus, transaction.Status)
 	assert.Equal(s.T(), expectedAmount, transaction.Amount)
-	assert.Equal(s.T(), expectedFromAccountFinalBalance, transaction.fromAccount.Balance)
-	assert.Equal(s.T(), expectedToAccountFinalBalance, transaction.toAccount.Balance)
+	assert.Equal(s.T(), expectedFromAccountFinalBalance, transaction.FromAccount.Balance)
+	assert.Equal(s.T(), expectedToAccountFinalBalance, transaction.ToAccount.Balance)
 	assert.NotNil(s.T(), transaction.CreatedAt)
 }
 
 func (s *TransactionTestSuite) TestNewTransaction_FailDueToNilFromAccount() {
-	expectedErrorMessage := "neither 'fromAccount' nor 'toAccount' can be nil"
+	expectedErrorMessage := "neither 'FromAccount' nor 'ToAccount' can be nil"
 
 	transaction, err := NewTransaction(nil, s.AccountTo, decimal.NewFromInt(100))
 
@@ -46,7 +46,7 @@ func (s *TransactionTestSuite) TestNewTransaction_FailDueToNilFromAccount() {
 }
 
 func (s *TransactionTestSuite) TestNewTransaction_FailDueToNilToAccount() {
-	expectedErrorMessage := "neither 'fromAccount' nor 'toAccount' can be nil"
+	expectedErrorMessage := "neither 'FromAccount' nor 'ToAccount' can be nil"
 
 	transaction, err := NewTransaction(nil, s.AccountFrom, decimal.NewFromInt(100))
 
@@ -91,7 +91,7 @@ func (s *TransactionTestSuite) TestNewTransaction_FailDueToAlreadyCompleted() {
 	assert.NotNil(s.T(), transaction)
 	assert.Equal(s.T(), expectedStatus, transaction.Status)
 	assert.Equal(s.T(), expectedAmount, transaction.Amount)
-	assert.Equal(s.T(), s.AccountFrom, transaction.fromAccount)
+	assert.Equal(s.T(), s.AccountFrom, transaction.FromAccount)
 	assert.Equal(s.T(), s.AccountTo.Balance.String(), expectedAmount.String())
 	assert.NotNil(s.T(), transaction.CreatedAt)
 }

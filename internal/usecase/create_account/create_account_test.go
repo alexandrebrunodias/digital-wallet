@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/alexandrebrunodias/wallet-core/internal/entity"
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	m "github.com/stretchr/testify/mock"
 	"testing"
@@ -17,7 +18,7 @@ func TestCreateAccountUseCase_Execute_CreateSuccessfully(t *testing.T) {
 	customerGatewayMock.On("GetByID", customer.ID).
 		Return(customer, nil)
 
-	accountGatewayMock.On("Save", m.AnythingOfType("*entity.Account")).
+	accountGatewayMock.On("Create", m.AnythingOfType("*entity.Account")).
 		Return(nil)
 
 	command := CreateAccountCommand{customer.ID}
@@ -32,7 +33,7 @@ func TestCreateAccountUseCase_Execute_CreateSuccessfully(t *testing.T) {
 	customerGatewayMock.AssertNumberOfCalls(t, "GetByID", 1)
 
 	accountGatewayMock.AssertExpectations(t)
-	accountGatewayMock.AssertNumberOfCalls(t, "Save", 1)
+	accountGatewayMock.AssertNumberOfCalls(t, "Create", 1)
 }
 
 func TestCreateAccountUseCase_Execute_FailDueToCustomerNotFound(t *testing.T) {
@@ -57,7 +58,7 @@ func TestCreateAccountUseCase_Execute_FailDueToCustomerNotFound(t *testing.T) {
 	customerGatewayMock.AssertExpectations(t)
 	customerGatewayMock.AssertNumberOfCalls(t, "GetByID", 1)
 
-	accountGatewayMock.AssertNotCalled(t, "Save")
+	accountGatewayMock.AssertNotCalled(t, "Create")
 }
 
 func TestCreateAccountUseCase_Execute_FailDueToGatewayError(t *testing.T) {
@@ -69,7 +70,7 @@ func TestCreateAccountUseCase_Execute_FailDueToGatewayError(t *testing.T) {
 	customerGatewayMock.On("GetByID", customer.ID).
 		Return(customer, nil)
 
-	accountGatewayMock.On("Save", m.AnythingOfType("*entity.Account")).
+	accountGatewayMock.On("Create", m.AnythingOfType("*entity.Account")).
 		Return(errors.New(expectedErrorMessage))
 
 	command := CreateAccountCommand{customer.ID}
@@ -85,14 +86,19 @@ func TestCreateAccountUseCase_Execute_FailDueToGatewayError(t *testing.T) {
 	customerGatewayMock.AssertNumberOfCalls(t, "GetByID", 1)
 
 	accountGatewayMock.AssertExpectations(t)
-	accountGatewayMock.AssertNumberOfCalls(t, "Save", 1)
+	accountGatewayMock.AssertNumberOfCalls(t, "Create", 1)
 }
 
 type AccountGatewayMock struct {
 	m.Mock
 }
 
-func (m *AccountGatewayMock) Save(account *entity.Account) error {
+func (m *AccountGatewayMock) UpdateBalance(ID uuid.UUID, amount decimal.Decimal) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *AccountGatewayMock) Create(account *entity.Account) error {
 	args := m.Called(account)
 	return args.Error(0)
 }
@@ -106,7 +112,7 @@ type CustomerGatewayMock struct {
 	m.Mock
 }
 
-func (m *CustomerGatewayMock) Save(customer *entity.Customer) error {
+func (m *CustomerGatewayMock) Create(customer *entity.Customer) error {
 	args := m.Called(customer)
 	return args.Error(0)
 }

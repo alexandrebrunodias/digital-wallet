@@ -11,7 +11,7 @@ import (
 
 func TestCreateCustomerUseCase_Execute_CreateSuccessfully(t *testing.T) {
 	customerGatewayMock := &CustomerGatewayMock{}
-	customerGatewayMock.On("Save", mock.Anything).Return(nil)
+	customerGatewayMock.On("Create", mock.Anything).Return(nil)
 
 	expectedName := "alex"
 	expectedEmail := "alexandrebrunodias@gmail.com"
@@ -33,14 +33,14 @@ func TestCreateCustomerUseCase_Execute_CreateSuccessfully(t *testing.T) {
 	assert.NotNil(t, output.UpdatedAt)
 
 	customerGatewayMock.AssertExpectations(t)
-	customerGatewayMock.AssertNumberOfCalls(t, "Save", 1)
+	customerGatewayMock.AssertNumberOfCalls(t, "Create", 1)
 }
 
 func TestCreateCustomerUseCase_Execute_FailDueToGatewayError(t *testing.T) {
 	expectedErrorMessage := "gateway error"
 
 	gatewayMock := &CustomerGatewayMock{}
-	gatewayMock.On("Save", mock.Anything).Return(errors.New(expectedErrorMessage))
+	gatewayMock.On("Create", mock.Anything).Return(errors.New(expectedErrorMessage))
 
 	expectedName := "alex"
 	expectedEmail := "alexandrebrunodias@gmail.com"
@@ -58,14 +58,14 @@ func TestCreateCustomerUseCase_Execute_FailDueToGatewayError(t *testing.T) {
 	assert.Nil(t, output)
 
 	gatewayMock.AssertExpectations(t)
-	gatewayMock.AssertNumberOfCalls(t, "Save", 1)
+	gatewayMock.AssertNumberOfCalls(t, "Create", 1)
 }
 
 type CustomerGatewayMock struct {
 	mock.Mock
 }
 
-func (m *CustomerGatewayMock) Save(customer *entity.Customer) error {
+func (m *CustomerGatewayMock) Create(customer *entity.Customer) error {
 	args := m.Called(customer)
 	return args.Error(0)
 }

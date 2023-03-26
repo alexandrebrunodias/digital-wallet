@@ -13,8 +13,8 @@ func TestNewAccountPgDBTestSuite(t *testing.T) {
 	suite.Run(t, new(AccountPgGatewaySuite))
 }
 
-func (s *AccountPgGatewaySuite) TestSaveAndGetByID_SaveSuccessfully() {
-	err := s.AccountPgGateway.Save(s.AccountOne)
+func (s *AccountPgGatewaySuite) TestCreateAndGetByID_SaveSuccessfully() {
+	err := s.AccountPgGateway.Create(s.AccountOne)
 	assert.Nil(s.T(), err)
 
 	actualAccount, err := s.AccountPgGateway.GetByID(s.AccountOne.ID)
@@ -28,10 +28,10 @@ func (s *AccountPgGatewaySuite) TestSaveAndGetByID_SaveSuccessfully() {
 	assert.Equal(s.T(), s.AccountOne.UpdatedAt, actualAccount.UpdatedAt)
 }
 
-func (s *AccountPgGatewaySuite) TestSave_FailDueInvalidAccount() {
+func (s *AccountPgGatewaySuite) TestCreate_FailDueInvalidAccount() {
 	expectedPanicMessage := "runtime error: invalid memory address or nil pointer dereference"
 	assert.Panicsf(s.T(), func() {
-		_ = s.AccountPgGateway.Save(&entity.Account{})
+		_ = s.AccountPgGateway.Create(&entity.Account{})
 	}, expectedPanicMessage)
 
 	actualAccount, err := s.AccountPgGateway.GetByID(s.AccountOne.ID)
@@ -41,8 +41,8 @@ func (s *AccountPgGatewaySuite) TestSave_FailDueInvalidAccount() {
 }
 
 func (s *AccountPgGatewaySuite) TestGetByID_GetSuccessfully() {
-	_ = s.AccountPgGateway.Save(s.AccountOne)
-	_ = s.AccountPgGateway.Save(s.AccountTwo)
+	_ = s.AccountPgGateway.Create(s.AccountOne)
+	_ = s.AccountPgGateway.Create(s.AccountTwo)
 
 	actualAccountOne, err := s.AccountPgGateway.GetByID(s.AccountOne.ID)
 
@@ -112,7 +112,7 @@ func (s *AccountPgGatewaySuite) SetupSuite() {
 	s.Customer, err = entity.NewCustomer("alex", "alexandrebrunodias@gmail.com")
 	s.Require().Nil(err)
 
-	err = NewCustomerPgGateway(db).Save(s.Customer)
+	err = NewCustomerPgGateway(db).Create(s.Customer)
 	s.Require().Nil(err)
 }
 

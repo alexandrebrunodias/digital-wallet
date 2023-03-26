@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/alexandrebrunodias/wallet-core/internal/entity"
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 )
 
 type AccountPgGateway struct {
@@ -14,7 +15,7 @@ func NewAccountPgGateway(db *sql.DB) *AccountPgGateway {
 	return &AccountPgGateway{DB: db}
 }
 
-func (a AccountPgGateway) Save(account *entity.Account) error {
+func (a AccountPgGateway) Create(account *entity.Account) error {
 	query := `INSERT INTO accounts (id, customer_id, balance, created_at, updated_at) 
 				VALUES (?, ?, ?, ?, ?)`
 
@@ -31,6 +32,23 @@ func (a AccountPgGateway) Save(account *entity.Account) error {
 		account.CreatedAt,
 		account.UpdatedAt,
 	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a AccountPgGateway) UpdateBalance(ID uuid.UUID, amount decimal.Decimal) error {
+	query := `UPDATE accounts SET balance = ? WHERE id = ?`
+
+	stmt, err := a.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(amount, ID)
 	if err != nil {
 		return err
 	}

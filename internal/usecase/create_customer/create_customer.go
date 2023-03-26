@@ -36,7 +36,7 @@ func (uc *CreateCustomerUseCase) Execute(command CreateCustomerCommand) (*Create
 		return nil, err
 	}
 
-	err = uc.CustomerGateway.Save(customer)
+	err = uc.CustomerGateway.Create(customer)
 
 	if err != nil {
 		return nil, err

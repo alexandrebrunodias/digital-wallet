@@ -6,6 +6,6 @@ import (
 )
 
 type CustomerGateway interface {
-	Save(customer *entity.Customer) error
+	Create(customer *entity.Customer) error
 	GetByID(ID uuid.UUID) (*entity.Customer, error)
 }

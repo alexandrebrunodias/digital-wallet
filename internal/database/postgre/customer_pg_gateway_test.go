@@ -20,7 +20,7 @@ func (s *CustomerPgGatewaySuite) TestSaveAndGetByID_SaveAndGetByIDSuccessfully()
 
 	expectedCustomer, _ := entity.NewCustomer(expectedName, expectedEmail)
 
-	err := s.CustomerPgGateway.Save(expectedCustomer)
+	err := s.CustomerPgGateway.Create(expectedCustomer)
 	assert.Nil(s.T(), err)
 
 	actualCustomer, err := s.CustomerPgGateway.GetByID(expectedCustomer.ID)

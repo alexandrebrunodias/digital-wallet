@@ -14,7 +14,7 @@ func NewCustomerPgGateway(db *sql.DB) *CustomerPgGatewayDB {
 	return &CustomerPgGatewayDB{DB: db}
 }
 
-func (c *CustomerPgGatewayDB) Save(customer *entity.Customer) error {
+func (c *CustomerPgGatewayDB) Create(customer *entity.Customer) error {
 	stmt, err := c.DB.Prepare(
 		"INSERT INTO customers (id, name, email, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
 	)

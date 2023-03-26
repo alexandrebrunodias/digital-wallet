@@ -15,16 +15,9 @@ func NewTransactionPgGateway(db *sql.DB) *TransactionPgGateway {
 }
 
 func (a TransactionPgGateway) Save(transaction *entity.Transaction) error {
-	tx, err := a.DB.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
 	query := `INSERT INTO transactions (id, from_account_id, to_account_id, amount, created_at) 
 				VALUES (?, ?, ?, ?, ?)`
-
-	stmt, err := tx.Prepare(query)
+	stmt, err := a.DB.Prepare(query)
 	if err != nil {
 		return err
 	}
@@ -41,20 +34,6 @@ func (a TransactionPgGateway) Save(transaction *entity.Transaction) error {
 		return err
 	}
 
-	query = `UPDATE accounts SET balance = ? WHERE id = ?`
-	stmt, err = tx.Prepare(query)
-	_, err = stmt.Exec(&transaction.FromAccount.Balance, &transaction.FromAccount.ID)
-	if err != nil {
-		return err
-	}
-	_, err = stmt.Exec(&transaction.ToAccount.Balance, &transaction.ToAccount.ID)
-	if err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
 	return nil
 }
 

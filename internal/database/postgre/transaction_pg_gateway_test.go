@@ -17,7 +17,6 @@ func TestNewTransactionPgDBTestSuite(t *testing.T) {
 func (s *TransactionPgGatewaySuite) TestSave_SaveSuccessfully() {
 	fromAccountInitialBalance := decimal.NewFromInt(2000)
 	expectedAmount := decimal.NewFromInt(1000)
-	expectedFromFinalBalance := fromAccountInitialBalance.Sub(expectedAmount)
 
 	_ = s.FromAccount.Credit(fromAccountInitialBalance)
 
@@ -32,7 +31,6 @@ func (s *TransactionPgGatewaySuite) TestSave_SaveSuccessfully() {
 	assert.Equal(s.T(), expectedTransaction.ID, actualTransaction.ID)
 	assert.Equal(s.T(), expectedAmount, actualTransaction.Amount)
 	assert.Equal(s.T(), s.FromAccount.ID, actualTransaction.FromAccount.ID)
-	assert.Equal(s.T(), expectedFromFinalBalance, actualTransaction.FromAccount.Balance)
 	assert.Equal(s.T(), s.ToAccount.ID, actualTransaction.ToAccount.ID)
 	assert.Equal(s.T(), expectedTransaction.CreatedAt, actualTransaction.CreatedAt)
 }
@@ -71,18 +69,7 @@ func (s *TransactionPgGatewaySuite) SetupSuite() {
 
 	s.TransactionPgGateway = NewTransactionPgGateway(db)
 
-	query := `CREATE TABLE accounts (
-				id BINARY(16) PRIMARY KEY,
-				customer_id BINARY(16) NOT NULL,
-				balance DECIMAL(12, 2),
-				created_at DATETIME,
-				updated_at DATETIME
-		     )`
-
-	_, err = s.TransactionPgGateway.DB.Exec(query)
-	s.Require().Nil(err)
-
-	query = `CREATE TABLE transactions (
+	query := `CREATE TABLE transactions (
 				id BINARY(16) PRIMARY KEY,
 				from_account_id BINARY(16) NOT NULL,
 				to_account_id BINARY(16) NOT NULL,
@@ -98,21 +85,14 @@ func (s *TransactionPgGatewaySuite) SetupTest() {
 	customer, err := entity.NewCustomer("alex", "alexandrebrunodias@gmail.com")
 	s.Require().Nil(err)
 
-	accountPgGateway := NewAccountPgGateway(s.TransactionPgGateway.DB)
 	s.FromAccount, err = entity.NewAccount(customer)
-	s.Require().Nil(err)
-	err = accountPgGateway.Save(s.FromAccount)
 	s.Require().Nil(err)
 
 	s.ToAccount, err = entity.NewAccount(customer)
-	s.Require().Nil(err)
-	err = accountPgGateway.Save(s.ToAccount)
 	s.Require().Nil(err)
 }
 
 func (s *TransactionPgGatewaySuite) TearDownSuite() {
 	defer s.TransactionPgGateway.DB.Close()
-	_, _ = s.TransactionPgGateway.DB.Exec("DROP TABLE accounts")
-	_, _ = s.TransactionPgGateway.DB.Exec("DROP TABLE customers")
 	_, _ = s.TransactionPgGateway.DB.Exec("DROP TABLE transactions")
 }

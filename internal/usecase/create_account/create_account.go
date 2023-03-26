@@ -40,7 +40,7 @@ func (uc *CreateAccountUseCase) Execute(command CreateAccountCommand) (*CreateAc
 		return nil, err
 	}
 
-	err = uc.AccountGateway.Save(account)
+	err = uc.AccountGateway.Create(account)
 	if err != nil {
 		return nil, err
 	}

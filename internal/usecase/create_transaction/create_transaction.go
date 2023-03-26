@@ -1,8 +1,10 @@
 package create_transaction
 
 import (
+	"context"
 	"github.com/alexandrebrunodias/wallet-core/internal/entity"
 	"github.com/alexandrebrunodias/wallet-core/internal/gateway"
+	"github.com/alexandrebrunodias/wallet-core/pkg/uow"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 )
@@ -18,41 +20,69 @@ type CreateTransactionOutput struct {
 }
 
 type CreateTransactionUseCase struct {
-	TransactionGateway gateway.TransactionGateway
-	AccountGateway     gateway.AccountGateway
+	UnitOfWork uow.UnitOfWorkInterface
 }
 
-func NewCreateTransactionUseCase(
-	transactionGateway gateway.TransactionGateway,
-	accountGateway gateway.AccountGateway,
-) *CreateTransactionUseCase {
-	return &CreateTransactionUseCase{
-		TransactionGateway: transactionGateway,
-		AccountGateway:     accountGateway,
-	}
+func NewCreateTransactionUseCase(UnitOfWork uow.UnitOfWorkInterface) *CreateTransactionUseCase {
+	return &CreateTransactionUseCase{UnitOfWork}
 }
 
-func (uc *CreateTransactionUseCase) Execute(command CreateTransactionCommand) (*CreateTransactionOutput, error) {
-	fromAccount, err := uc.AccountGateway.GetByID(command.FromAccountID)
-	if err != nil {
-		return nil, err
-	}
-	toAccount, err := uc.AccountGateway.GetByID(command.ToAccountID)
-	if err != nil {
-		return nil, err
-	}
+func (uc *CreateTransactionUseCase) Execute(ctx context.Context, command CreateTransactionCommand) (*CreateTransactionOutput, error) {
+	output := &CreateTransactionOutput{}
+	err := uc.UnitOfWork.Do(ctx, func(unitOfWork *uow.UnitOfWork) error {
+		accountGateway := uc.getAccountGateway(ctx)
+		transactionGateway := uc.getTransactionGateway(ctx)
 
-	transaction, err := entity.NewTransaction(fromAccount, toAccount, command.Amount)
+		fromAccount, err := accountGateway.GetByID(command.FromAccountID)
+		if err != nil {
+			return err
+		}
+
+		toAccount, err := accountGateway.GetByID(command.ToAccountID)
+		if err != nil {
+			return err
+		}
+
+		transaction, err := entity.NewTransaction(fromAccount, toAccount, command.Amount)
+		if err != nil {
+			return err
+		}
+
+		err = transactionGateway.Save(transaction)
+		if err != nil {
+			return err
+		}
+
+		err = accountGateway.UpdateBalance(fromAccount.ID, transaction.FromAccount.Balance)
+		if err != nil {
+			return err
+		}
+
+		err = accountGateway.UpdateBalance(toAccount.ID, transaction.ToAccount.Balance)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
-	err = uc.TransactionGateway.Save(transaction)
+	return output, nil
+}
+
+func (uc *CreateTransactionUseCase) getAccountGateway(ctx context.Context) gateway.AccountGateway {
+	repository, err := uc.UnitOfWork.GetRepository(ctx, "AccountGateway")
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
+	return repository.(gateway.AccountGateway)
+}
 
-	_ = uc.AccountGateway.Save(fromAccount)
-	_ = uc.AccountGateway.Save(toAccount)
-
-	return &CreateTransactionOutput{ID: transaction.ID}, nil
+func (uc *CreateTransactionUseCase) getTransactionGateway(ctx context.Context) gateway.TransactionGateway {
+	repository, err := uc.UnitOfWork.GetRepository(ctx, "TransactionGateway")
+	if err != nil {
+		panic(err)
+	}
+	return repository.(gateway.TransactionGateway)
 }

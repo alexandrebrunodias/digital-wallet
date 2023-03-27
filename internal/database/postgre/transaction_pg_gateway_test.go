@@ -14,14 +14,14 @@ func TestNewTransactionPgDBTestSuite(t *testing.T) {
 	suite.Run(t, new(TransactionPgGatewaySuite))
 }
 
-func (s *TransactionPgGatewaySuite) TestSave_SaveSuccessfully() {
+func (s *TransactionPgGatewaySuite) TestCreate_SaveSuccessfully() {
 	fromAccountInitialBalance := decimal.NewFromInt(2000)
 	expectedAmount := decimal.NewFromInt(1000)
 
 	_ = s.FromAccount.Credit(fromAccountInitialBalance)
 
 	expectedTransaction, _ := entity.NewTransaction(s.FromAccount, s.ToAccount, expectedAmount)
-	err := s.TransactionPgGateway.Save(expectedTransaction)
+	err := s.TransactionPgGateway.Create(expectedTransaction)
 	assert.Nil(s.T(), err)
 
 	actualTransaction, err := s.TransactionPgGateway.GetByID(expectedTransaction.ID)
@@ -35,10 +35,10 @@ func (s *TransactionPgGatewaySuite) TestSave_SaveSuccessfully() {
 	assert.Equal(s.T(), expectedTransaction.CreatedAt, actualTransaction.CreatedAt)
 }
 
-func (s *TransactionPgGatewaySuite) TestSave_FailDueInvalidAccount() {
+func (s *TransactionPgGatewaySuite) TestCreate_FailDueInvalidAccount() {
 	expectedPanicMessage := "runtime error: invalid memory address or nil pointer dereference"
 	assert.Panicsf(s.T(), func() {
-		_ = s.TransactionPgGateway.Save(&entity.Transaction{})
+		_ = s.TransactionPgGateway.Create(&entity.Transaction{})
 	}, expectedPanicMessage)
 
 	actualAccount, err := s.TransactionPgGateway.GetByID(s.FromAccount.ID)

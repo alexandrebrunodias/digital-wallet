@@ -14,7 +14,7 @@ func NewTransactionPgGateway(db *sql.DB) *TransactionPgGateway {
 	return &TransactionPgGateway{DB: db}
 }
 
-func (a TransactionPgGateway) Save(transaction *entity.Transaction) error {
+func (a TransactionPgGateway) Create(transaction *entity.Transaction) error {
 	query := `INSERT INTO transactions (id, from_account_id, to_account_id, amount, created_at) 
 				VALUES (?, ?, ?, ?, ?)`
 	stmt, err := a.DB.Prepare(query)

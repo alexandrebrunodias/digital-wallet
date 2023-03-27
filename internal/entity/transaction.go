@@ -9,11 +9,6 @@ import (
 
 type Status string
 
-const (
-	COMPLETED Status = "COMPLETED"
-	FAILED           = "FAILED"
-)
-
 type Transaction struct {
 	ID          uuid.UUID
 	FromAccount *Account
@@ -28,7 +23,6 @@ func NewTransaction(fromAccount *Account, toAccount *Account, amount decimal.Dec
 		ID:          uuid.New(),
 		FromAccount: fromAccount,
 		ToAccount:   toAccount,
-		Status:      FAILED,
 		Amount:      amount,
 		CreatedAt:   time.Now().UTC(),
 	}
@@ -45,18 +39,12 @@ func NewTransaction(fromAccount *Account, toAccount *Account, amount decimal.Dec
 }
 
 func (t *Transaction) Commit() error {
-	if t.Status == COMPLETED {
-		return errors.New("transaction is already COMPLETED")
-	}
-
 	if err := t.FromAccount.Debit(t.Amount); err != nil {
 		return err
 	}
 	if err := t.ToAccount.Credit(t.Amount); err != nil {
 		return err
 	}
-
-	t.Status = COMPLETED
 	return nil
 }
 

@@ -4,10 +4,13 @@ import (
 	"context"
 	"github.com/alexandrebrunodias/wallet-core/internal/entity"
 	"github.com/alexandrebrunodias/wallet-core/internal/gateway"
+	"github.com/alexandrebrunodias/wallet-core/pkg/events"
 	"github.com/alexandrebrunodias/wallet-core/pkg/uow"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 )
+
+const TransactionCreated = "wallet.core.transaction.created"
 
 type CreateTransactionCommand struct {
 	FromAccountID uuid.UUID
@@ -16,20 +19,30 @@ type CreateTransactionCommand struct {
 }
 
 type CreateTransactionOutput struct {
-	ID uuid.UUID
+	ID            uuid.UUID       `json:"id"`
+	FromAccountID uuid.UUID       `json:"from_account_id"`
+	ToAccountID   uuid.UUID       `json:"to_account_id"`
+	Amount        decimal.Decimal `json:"amount"`
 }
 
 type CreateTransactionUseCase struct {
-	UnitOfWork uow.UnitOfWorkInterface
+	UnitOfWork     uow.UnitOfWorkInterface
+	EventPublisher events.EventPublisher
 }
 
-func NewCreateTransactionUseCase(UnitOfWork uow.UnitOfWorkInterface) *CreateTransactionUseCase {
-	return &CreateTransactionUseCase{UnitOfWork}
+func NewCreateTransactionUseCase(
+	UnitOfWork uow.UnitOfWorkInterface,
+	EventPublisher events.EventPublisher,
+) *CreateTransactionUseCase {
+	return &CreateTransactionUseCase{
+		UnitOfWork:     UnitOfWork,
+		EventPublisher: EventPublisher,
+	}
 }
 
 func (uc *CreateTransactionUseCase) Execute(ctx context.Context, command CreateTransactionCommand) (*CreateTransactionOutput, error) {
 	output := &CreateTransactionOutput{}
-	err := uc.UnitOfWork.Do(ctx, func(unitOfWork *uow.UnitOfWork) error {
+	err := uc.UnitOfWork.Do(ctx, func(_ *uow.UnitOfWork) error {
 		accountGateway := uc.getAccountGateway(ctx)
 		transactionGateway := uc.getTransactionGateway(ctx)
 
@@ -48,11 +61,6 @@ func (uc *CreateTransactionUseCase) Execute(ctx context.Context, command CreateT
 			return err
 		}
 
-		err = transactionGateway.Save(transaction)
-		if err != nil {
-			return err
-		}
-
 		err = accountGateway.UpdateBalance(fromAccount.ID, transaction.FromAccount.Balance)
 		if err != nil {
 			return err
@@ -63,11 +71,23 @@ func (uc *CreateTransactionUseCase) Execute(ctx context.Context, command CreateT
 			return err
 		}
 
+		err = transactionGateway.Create(transaction)
+		if err != nil {
+			return err
+		}
+
+		output.ID = transaction.ID
+		output.FromAccountID = fromAccount.ID
+		output.ToAccountID = toAccount.ID
+		output.Amount = transaction.Amount
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
+
+	event := events.NewEvent(TransactionCreated, output)
+	uc.EventPublisher.Register(*event).Publish()
 	return output, nil
 }
 

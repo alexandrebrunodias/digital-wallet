@@ -6,6 +6,6 @@ import (
 )
 
 type TransactionGateway interface {
-	Save(transaction *entity.Transaction) error
+	Create(transaction *entity.Transaction) error
 	GetByID(ID uuid.UUID) (*entity.Transaction, error)
 }

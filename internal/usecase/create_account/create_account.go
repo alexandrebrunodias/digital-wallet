@@ -7,11 +7,11 @@ import (
 )
 
 type CreateAccountCommand struct {
-	CustomerID uuid.UUID
+	CustomerID uuid.UUID `json:"customer_id"`
 }
 
 type CreateAccountOutput struct {
-	ID uuid.UUID
+	ID uuid.UUID `json:"id"`
 }
 
 type CreateAccountUseCase struct {
@@ -19,7 +19,7 @@ type CreateAccountUseCase struct {
 	CustomerGateway gateway.CustomerGateway
 }
 
-func NewAccountUseCase(
+func NewCreateAccountUseCase(
 	accountGateway gateway.AccountGateway,
 	customerGateway gateway.CustomerGateway,
 ) *CreateAccountUseCase {

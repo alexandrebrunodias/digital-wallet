@@ -13,9 +13,9 @@ import (
 const TransactionCreated = "wallet.core.transaction.created"
 
 type CreateTransactionCommand struct {
-	FromAccountID uuid.UUID
-	ToAccountID   uuid.UUID
-	Amount        decimal.Decimal
+	FromAccountID uuid.UUID       `json:"from_account_id"`
+	ToAccountID   uuid.UUID       `json:"to_account_id"`
+	Amount        decimal.Decimal `json:"amount"`
 }
 
 type CreateTransactionOutput struct {
@@ -27,12 +27,12 @@ type CreateTransactionOutput struct {
 
 type CreateTransactionUseCase struct {
 	UnitOfWork     uow.UnitOfWorkInterface
-	EventPublisher events.EventPublisher
+	EventPublisher events.EventPublisherInterface
 }
 
 func NewCreateTransactionUseCase(
 	UnitOfWork uow.UnitOfWorkInterface,
-	EventPublisher events.EventPublisher,
+	EventPublisher events.EventPublisherInterface,
 ) *CreateTransactionUseCase {
 	return &CreateTransactionUseCase{
 		UnitOfWork:     UnitOfWork,

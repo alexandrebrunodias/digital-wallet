@@ -23,7 +23,7 @@ func TestCreateAccountUseCase_Execute_CreateSuccessfully(t *testing.T) {
 
 	command := CreateAccountCommand{customer.ID}
 
-	useCase := NewAccountUseCase(accountGatewayMock, customerGatewayMock)
+	useCase := NewCreateAccountUseCase(accountGatewayMock, customerGatewayMock)
 	output, err := useCase.Execute(command)
 
 	assert.Nil(t, err)
@@ -48,7 +48,7 @@ func TestCreateAccountUseCase_Execute_FailDueToCustomerNotFound(t *testing.T) {
 
 	command := CreateAccountCommand{customerID}
 
-	useCase := NewAccountUseCase(accountGatewayMock, customerGatewayMock)
+	useCase := NewCreateAccountUseCase(accountGatewayMock, customerGatewayMock)
 	output, err := useCase.Execute(command)
 
 	assert.NotNil(t, err)
@@ -75,7 +75,7 @@ func TestCreateAccountUseCase_Execute_FailDueToGatewayError(t *testing.T) {
 
 	command := CreateAccountCommand{customer.ID}
 
-	useCase := NewAccountUseCase(accountGatewayMock, customerGatewayMock)
+	useCase := NewCreateAccountUseCase(accountGatewayMock, customerGatewayMock)
 	output, err := useCase.Execute(command)
 
 	assert.NotNil(t, err)
@@ -94,7 +94,6 @@ type AccountGatewayMock struct {
 }
 
 func (m *AccountGatewayMock) UpdateBalance(ID uuid.UUID, amount decimal.Decimal) error {
-	//TODO implement me
 	panic("implement me")
 }
 

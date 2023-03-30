@@ -36,14 +36,14 @@ func (p *Producer) Send(event events.Event, wg *sync.WaitGroup) error {
 		return err
 	}
 
-	json, err := json.Marshal(event)
+	payload, err := json.Marshal(event)
 	if err != nil {
 		return err
 	}
 
 	message := &ckafka.Message{
 		TopicPartition: ckafka.TopicPartition{Topic: p.Topic, Partition: ckafka.PartitionAny},
-		Value:          json,
+		Value:          payload,
 		Key:            p.PartitionKey,
 	}
 	err = producer.Produce(message, nil)

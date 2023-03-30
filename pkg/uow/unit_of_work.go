@@ -24,7 +24,10 @@ type UnitOfWork struct {
 	repositories map[string]Repository
 }
 
-func NewUnitOfWork(db *sql.DB) *UnitOfWork {
+func NewUnitOfWork(ctx context.Context, db *sql.DB) *UnitOfWork {
+	if db == nil {
+		panic("'db' must not be null")
+	}
 	return &UnitOfWork{
 		Db:           db,
 		repositories: make(map[string]Repository),
@@ -77,6 +80,7 @@ func (u *UnitOfWork) Do(ctx context.Context, fn func(unitOfWork *UnitOfWork) err
 }
 
 func (u *UnitOfWork) CommitOrRollback() error {
+	defer u.resetTransaction()
 	err := u.Tx.Commit()
 	if err != nil {
 		errRollBack := u.Tx.Rollback()
@@ -89,11 +93,11 @@ func (u *UnitOfWork) CommitOrRollback() error {
 		}
 		return err
 	}
-	u.Tx = nil
 	return nil
 }
 
 func (u *UnitOfWork) RollBack() error {
+	defer u.resetTransaction()
 	if u.Tx != nil {
 		err := u.Tx.Rollback()
 		if err != nil {
@@ -101,4 +105,8 @@ func (u *UnitOfWork) RollBack() error {
 		}
 	}
 	return nil
+}
+
+func (u *UnitOfWork) resetTransaction() {
+	u.Tx = nil
 }

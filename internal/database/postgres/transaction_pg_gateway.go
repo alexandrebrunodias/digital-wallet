@@ -1,4 +1,4 @@
-package postgre
+package postgres
 
 import (
 	"database/sql"
@@ -16,7 +16,7 @@ func NewTransactionPgGateway(db *sql.DB) *TransactionPgGateway {
 
 func (a TransactionPgGateway) Create(transaction *entity.Transaction) error {
 	query := `INSERT INTO transactions (id, from_account_id, to_account_id, amount, created_at) 
-				VALUES (?, ?, ?, ?, ?)`
+				VALUES ($1, $2, $3, $4, $5)`
 	stmt, err := a.DB.Prepare(query)
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func (a TransactionPgGateway) GetByID(ID uuid.UUID) (*entity.Transaction, error)
 
 	query := `SELECT id, from_account_id, to_account_id, amount, created_at
 			  	FROM transactions
-			  	WHERE id = ?`
+			  	WHERE id = $1`
 	stmt, err := a.DB.Prepare(query)
 	if err != nil {
 		return nil, err

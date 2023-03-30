@@ -4,7 +4,9 @@ go 1.20
 
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.0.2
+	github.com/go-chi/chi v1.5.4
 	github.com/google/uuid v1.3.0
+	github.com/lib/pq v1.10.7
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.8.2

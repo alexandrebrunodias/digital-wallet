@@ -8,16 +8,16 @@ import (
 )
 
 type CreateCustomerCommand struct {
-	Name  string
-	Email string
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 type CreateCustomerOutput struct {
-	ID        uuid.UUID
-	Name      string
-	Email     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type CreateCustomerUseCase struct {
@@ -37,7 +37,6 @@ func (uc *CreateCustomerUseCase) Execute(command CreateCustomerCommand) (*Create
 	}
 
 	err = uc.CustomerGateway.Create(customer)
-
 	if err != nil {
 		return nil, err
 	}

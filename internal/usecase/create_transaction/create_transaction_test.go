@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/alexandrebrunodias/wallet-core/internal/entity"
+	"github.com/alexandrebrunodias/wallet-core/pkg/events"
 	"github.com/alexandrebrunodias/wallet-core/pkg/uow"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -31,7 +32,11 @@ func TestCreateTransactionUseCase_Execute_CreateSuccessfully(t *testing.T) {
 	unitOfWorkMock := &UnitOfWorkMock{}
 	unitOfWorkMock.On("Do", m.Anything, m.Anything).Return(nil)
 
-	useCase := NewCreateTransactionUseCase(unitOfWorkMock)
+	eventPublisherMock := &EventPublisherMock{}
+	eventPublisherMock.On("Register", m.Anything).Return(eventPublisherMock)
+	eventPublisherMock.On("Publish", m.Anything)
+
+	useCase := NewCreateTransactionUseCase(unitOfWorkMock, eventPublisherMock)
 	output, err := useCase.Execute(context.Background(), command)
 
 	assert.Nil(t, err)
@@ -39,6 +44,10 @@ func TestCreateTransactionUseCase_Execute_CreateSuccessfully(t *testing.T) {
 
 	unitOfWorkMock.AssertExpectations(t)
 	unitOfWorkMock.AssertNumberOfCalls(t, "Do", 1)
+
+	eventPublisherMock.AssertExpectations(t)
+	eventPublisherMock.AssertNumberOfCalls(t, "Register", 1)
+	eventPublisherMock.AssertNumberOfCalls(t, "Publish", 1)
 }
 
 func TestCreateTransactionUseCase_Execute_FailDueToErrorOnUnitOfWorkTransaction(t *testing.T) {
@@ -57,7 +66,9 @@ func TestCreateTransactionUseCase_Execute_FailDueToErrorOnUnitOfWorkTransaction(
 		On("Do", m.Anything, m.Anything).
 		Return(errors.New(expectedErrorMessage))
 
-	useCase := NewCreateTransactionUseCase(unitOfWorkMock)
+	eventPublisherMock := &EventPublisherMock{}
+
+	useCase := NewCreateTransactionUseCase(unitOfWorkMock, eventPublisherMock)
 	output, err := useCase.Execute(context.Background(), command)
 
 	assert.NotNil(t, err)
@@ -66,6 +77,23 @@ func TestCreateTransactionUseCase_Execute_FailDueToErrorOnUnitOfWorkTransaction(
 
 	unitOfWorkMock.AssertExpectations(t)
 	unitOfWorkMock.AssertNumberOfCalls(t, "Do", 1)
+
+	eventPublisherMock.AssertExpectations(t)
+	eventPublisherMock.AssertNotCalled(t, "Register")
+	eventPublisherMock.AssertNotCalled(t, "Publish")
+}
+
+type EventPublisherMock struct {
+	m.Mock
+}
+
+func (e *EventPublisherMock) Register(event events.Event) events.EventPublisherInterface {
+	args := e.Called(event)
+	return args.Get(0).(events.EventPublisherInterface)
+}
+
+func (e *EventPublisherMock) Publish() {
+	e.Called()
 }
 
 type UnitOfWorkMock struct {

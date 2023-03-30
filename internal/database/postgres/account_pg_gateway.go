@@ -1,4 +1,4 @@
-package postgre
+package postgres
 
 import (
 	"database/sql"
@@ -17,7 +17,7 @@ func NewAccountPgGateway(db *sql.DB) *AccountPgGateway {
 
 func (a AccountPgGateway) Create(account *entity.Account) error {
 	query := `INSERT INTO accounts (id, customer_id, balance, created_at, updated_at) 
-				VALUES (?, ?, ?, ?, ?)`
+				VALUES ($1, $2, $3, $4, $5)`
 
 	stmt, err := a.DB.Prepare(query)
 	if err != nil {
@@ -40,7 +40,7 @@ func (a AccountPgGateway) Create(account *entity.Account) error {
 }
 
 func (a AccountPgGateway) UpdateBalance(ID uuid.UUID, amount decimal.Decimal) error {
-	query := `UPDATE accounts SET balance = ? WHERE id = ?`
+	query := `UPDATE accounts SET balance = $1 WHERE id = $2`
 
 	stmt, err := a.DB.Prepare(query)
 	if err != nil {
@@ -63,7 +63,7 @@ func (a AccountPgGateway) GetByID(ID uuid.UUID) (*entity.Account, error) {
 
 	query := `SELECT id, customer_id, balance, created_at, updated_at
 			  	FROM accounts
-			  	WHERE id = ?`
+			  	WHERE id = $1`
 	stmt, err := a.DB.Prepare(query)
 	if err != nil {
 		return nil, err

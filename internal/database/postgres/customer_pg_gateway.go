@@ -1,4 +1,4 @@
-package postgre
+package postgres
 
 import (
 	"database/sql"
@@ -16,7 +16,7 @@ func NewCustomerPgGateway(db *sql.DB) *CustomerPgGatewayDB {
 
 func (c *CustomerPgGatewayDB) Create(customer *entity.Customer) error {
 	stmt, err := c.DB.Prepare(
-		"INSERT INTO customers (id, name, email, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+		"INSERT INTO customers (id, name, email, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)",
 	)
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func (c *CustomerPgGatewayDB) GetByID(ID uuid.UUID) (*entity.Customer, error) {
 	customer := &entity.Customer{}
 	query := `SELECT id, name, email, created_at, updated_at 
 				FROM customers 
- 				WHERE id = ?`
+ 				WHERE id = $1`
 
 	stmt, err := c.DB.Prepare(query)
 	if err != nil {
@@ -43,7 +43,7 @@ func (c *CustomerPgGatewayDB) GetByID(ID uuid.UUID) (*entity.Customer, error) {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(ID).
+	err = stmt.QueryRow(ID.String()).
 		Scan(
 			&customer.ID,
 			&customer.Name,
